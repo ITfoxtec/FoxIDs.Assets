@@ -1,0 +1,45 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: foxids-ingress-http
+  annotations:
+   # Rate Limiting, docs https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#rate-limiting
+   #nginx.ingress.kubernetes.io/limit-whitelist: "x.x.x.x/x"   # Configure the internal network to be excluded from rate-limiting, you can specify a list of IPs or CIDRs to allow
+   #nginx.ingress.kubernetes.io/limit-connections: "200"       # Limit the number of connections per IP address
+   #nginx.ingress.kubernetes.io/limit-rpm: "600"               # Limit the number of requests per minute per IP address
+   #nginx.ingress.kubernetes.io/limit-rps: "200"               # Limit the number of requests per second per IP address
+   #Buffer
+   nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
+   nginx.ingress.kubernetes.io/proxy-buffer-size: "32k"
+   #Certificate
+   cert-manager.io/issuer: "letsencrypt-production" #production    
+   #cert-manager.io/issuer: "letsencrypt-staging" #staging
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+      - id.itfoxtec.com   # change to your domain -  id.my-domain.com
+      - control.itfoxtec.com  # change to your domain -  control.my-domain.com
+      secretName: letsencrypt-production-tls #production  
+      #secretName: letsencrypt-staging-tls #staging
+  rules:
+  - host: id.itfoxtec.com   # change to your domain -  id.my-domain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: foxids
+            port:
+              number: 8800
+  - host: control.itfoxtec.com   # change to your domain -  control.my-domain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: foxids-control
+            port:
+              number: 8800
