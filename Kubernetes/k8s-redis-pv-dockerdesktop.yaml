@@ -9,7 +9,7 @@ spec:
   accessModes:
   - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: standard
+  storageClassName: hostpath
   hostPath:
     # local directory c:\data\foxids-data\redis on Docker Desktop host machine
     path: "/run/desktop/mnt/host/c/data/foxids-data/redis"
