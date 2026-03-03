@@ -63,6 +63,25 @@
       "metadata": {
         "description": "Optional, Sendgrid API key."
       }
+    },
+    "foxidsVersion": {
+      "type": "string",
+      "defaultValue": "2.15.3",
+      "metadata": {
+        "description": "FoxIDs Docker image version used for both FoxIDs and FoxIDs Control."
+      }
+    },
+    "dockerRegistryCustomerId": {
+      "type": "string",
+      "metadata": {
+        "description": "Customer ID used as username for the FoxIDs Docker registry."
+      }
+    },
+    "dockerRegistryPullSecret": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Pull secret used as password for the FoxIDs Docker registry."
+      }
     }
   },
   "variables": {
@@ -290,7 +309,7 @@
       "properties": {
         "name": "[variables('foxidsDefaultName')]",
         "siteConfig": {
-          "linuxFxVersion": "DOCKER|foxids/foxids:latest",
+          "linuxFxVersion": "[concat('DOCKER|www.foxids.com/foxids:', parameters('foxidsVersion'))]",
           "ftpsState": "Disabled",
           "alwaysOn": true
         },
@@ -316,7 +335,7 @@
       "properties": {
         "name": "[variables('foxidsControlSiteName')]",
         "siteConfig": {
-          "linuxFxVersion": "DOCKER|foxids/foxids-control:latest",
+          "linuxFxVersion": "[concat('DOCKER|www.foxids.com/foxidscontrol:', parameters('foxidsVersion'))]",
           "ftpsState": "Disabled",
           "alwaysOn": true
         },
@@ -339,8 +358,10 @@
       "properties": {
         "WEBSITES_ENABLE_APP_SERVICE_STORAGE": false,
         "Settings__FoxIDsEndpoint": "[variables('foxidsSiteEndpoint')]",
-        "DOCKER_REGISTRY_SERVER_URL": "https://index.docker.io/v1",
-        "DOCKER_ENABLE_CI": true,
+        "DOCKER_REGISTRY_SERVER_URL": "https://www.foxids.com",
+        "DOCKER_REGISTRY_SERVER_USERNAME": "[parameters('dockerRegistryCustomerId')]",
+        "DOCKER_REGISTRY_SERVER_PASSWORD": "[parameters('dockerRegistryPullSecret')]",
+        "DOCKER_ENABLE_CI": false,
         "ASPNETCORE_URLS": "http://+",
         "Settings__UseHttp": true,
         "Settings__TrustProxySchemeHeader": true,
@@ -368,8 +389,10 @@
       "properties": {
         "WEBSITES_ENABLE_APP_SERVICE_STORAGE": false,
         "ApplicationInsights__ConnectionString": "[reference(concat('microsoft.insights/components/', variables('foxidsDefaultName'))).ConnectionString]",
-        "DOCKER_REGISTRY_SERVER_URL": "https://index.docker.io/v1",
-        "DOCKER_ENABLE_CI": true,
+        "DOCKER_REGISTRY_SERVER_URL": "https://www.foxids.com",
+        "DOCKER_REGISTRY_SERVER_USERNAME": "[parameters('dockerRegistryCustomerId')]",
+        "DOCKER_REGISTRY_SERVER_PASSWORD": "[parameters('dockerRegistryPullSecret')]",
+        "DOCKER_ENABLE_CI": false,
         "ASPNETCORE_URLS": "http://+",
         "Settings__UseHttp": true,
         "Settings__TrustProxySchemeHeader": true,
