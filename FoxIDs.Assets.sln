@@ -1,10 +1,23 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.3.11520.95 d18.3
+VisualStudioVersion = 18.3.11520.95
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{07C2787E-EAC7-C090-1BA3-A61EC2A24D84}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoxIDs.ConvertCertificateTool", "Tools\FoxIDs.ConvertCertificateTool\FoxIDs.ConvertCertificateTool.csproj", "{2046E46E-ECDA-91E7-3807-17CF8AFDB624}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SeedTool-csv-files", "SeedTool-csv-files", "{71C85389-4B6E-405A-B724-CD19C7D082A0}"
+	ProjectSection(SolutionItems) = preProject
+		Tools\SeedTool-csv-files\email-2,000,000-test-users-big.csv = Tools\SeedTool-csv-files\email-2,000,000-test-users-big.csv
+		Tools\SeedTool-csv-files\email-3-test-users.csv = Tools\SeedTool-csv-files\email-3-test-users.csv
+		Tools\SeedTool-csv-files\email-5,000-test-users-with-error.csv = Tools\SeedTool-csv-files\email-5,000-test-users-with-error.csv
+		Tools\SeedTool-csv-files\email-50,000-test-users.csv = Tools\SeedTool-csv-files\email-50,000-test-users.csv
+		Tools\SeedTool-csv-files\password-claims-3-test-users.csv = Tools\SeedTool-csv-files\password-claims-3-test-users.csv
+		Tools\SeedTool-csv-files\password-claims-50,000-test-users.csv = Tools\SeedTool-csv-files\password-claims-50,000-test-users.csv
+		Tools\SeedTool-csv-files\password-claims-500,000-test-users.csv = Tools\SeedTool-csv-files\password-claims-500,000-test-users.csv
+		Tools\SeedTool-csv-files\user-identifiers-3-test-users.csv = Tools\SeedTool-csv-files\user-identifiers-3-test-users.csv
+		Tools\SeedTool-csv-files\user-identifiers-6-test-users.csv = Tools\SeedTool-csv-files\user-identifiers-6-test-users.csv
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -22,6 +35,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{2046E46E-ECDA-91E7-3807-17CF8AFDB624} = {07C2787E-EAC7-C090-1BA3-A61EC2A24D84}
+		{71C85389-4B6E-405A-B724-CD19C7D082A0} = {07C2787E-EAC7-C090-1BA3-A61EC2A24D84}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {751ED9D6-B17D-4CA6-806F-C1313A2C8A35}
