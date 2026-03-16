@@ -30,6 +30,9 @@ spec:
               value: "true"
             - name: "Settings__TrustProxySchemeHeader"
               value: "true"
+            # Enable only for troubleshooting. Logs all incoming HTTP request headers and can include sensitive values such as cookies and authorization headers.
+            # - name: "Settings__LogRequestHeaders"
+            #   value: "true"
             - name: "Settings__FoxIDsEndpoint"
               value: "https://id.itfoxtec.com" # change to your domain - https://id.my-domain.com
             - name: "Settings__Options__Log"
