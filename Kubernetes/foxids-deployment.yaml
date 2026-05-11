@@ -37,6 +37,7 @@ spec:
               value: "https://id.itfoxtec.com" # change to your domain - https://id.my-domain.com
             - name: "Settings__Options__Log"
               value: "Stdout"
+            #   value: "OpenSearchAndStdoutErrors"
             - name: "Settings__Options__DataStorage"
               value: "MongoDb"
             #   value: "PostgreSql"  # PostgreSql database
@@ -90,6 +91,23 @@ spec:
             #       key: database_url
             # - name: "Settings__RedisCache__ConnectionString"
             #   value: "$(REDIS_SERVER):6379"
+            # OpenSearch
+            # - name: OPENSEARCH_PASSWORD
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: opensearch-secret
+            #       key: opensearch-password
+            # - name: OPENSEARCH_SERVER
+            #   valueFrom:
+            #     configMapKeyRef:
+            #       name: opensearch-configmap
+            #       key: opensearch_url
+            # - name: "Settings__OpenSearch__Nodes__0"
+            #   value: "https://admin:$(OPENSEARCH_PASSWORD)@$(OPENSEARCH_SERVER):9200"
+            # - name: "Settings__OpenSearch__LogLifetime"
+            #   value: "Max180Days"
+            # - name: "Settings__OpenSearch__AllowInsecureCertificates"
+            #   value: "true"
           livenessProbe:
             httpGet:
               path: /health
@@ -156,6 +174,7 @@ spec:
               value: "true"
             - name: "Settings__Options__Log"
               value: "Stdout"
+           #   value: "OpenSearchAndStdoutErrors"
             - name: "Settings__Options__DataStorage"
               value: "MongoDb"
            #   value: "PostgreSql"  # PostgreSql database
@@ -208,6 +227,23 @@ spec:
             #       key: database_url
             # - name: "Settings__RedisCache__ConnectionString"
             #   value: "$(REDIS_SERVER):6379"
+            # OpenSearch
+            # - name: OPENSEARCH_PASSWORD
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: opensearch-secret
+            #       key: opensearch-password
+            # - name: OPENSEARCH_SERVER
+            #   valueFrom:
+            #     configMapKeyRef:
+            #       name: opensearch-configmap
+            #       key: opensearch_url
+            # - name: "Settings__OpenSearch__Nodes__0"
+            #   value: "https://admin:$(OPENSEARCH_PASSWORD)@$(OPENSEARCH_SERVER):9200"
+            # - name: "Settings__OpenSearch__LogLifetime"
+            #   value: "Max180Days"
+            # - name: "Settings__OpenSearch__AllowInsecureCertificates"
+            #   value: "true"
           livenessProbe:
             httpGet:
               path: /api/health

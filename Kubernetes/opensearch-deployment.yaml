@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opensearch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: opensearch
+  template:
+    metadata:
+      labels:
+        app: opensearch
+    spec:
+      initContainers:
+      - name: set-vm-max-map-count
+        image: busybox:latest
+        command: ["sh", "-c", "sysctl -w vm.max_map_count=262144"]
+        securityContext:
+          privileged: true
+      containers:
+      - name: opensearch
+        image: opensearchproject/opensearch:latest
+        ports:
+        - containerPort: 9200
+        - containerPort: 9600
+        env:
+        - name: cluster.name
+          value: foxids-opensearch
+        - name: node.name
+          value: opensearch
+        - name: discovery.type
+          value: single-node
+        - name: bootstrap.memory_lock
+          value: "true"
+        - name: OPENSEARCH_JAVA_OPTS
+          value: "-Xms512m -Xmx512m"
+        - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: opensearch-secret
+              key: opensearch-password
+        volumeMounts:
+        - mountPath: /usr/share/opensearch/data
+          name: opensearch-data
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1"
+        securityContext:
+          allowPrivilegeEscalation: false
+      volumes:
+      - name: opensearch-data
+        persistentVolumeClaim:
+          claimName: opensearch-data-pvc
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: opensearch-service
+spec:
+  selector:
+    app: opensearch
+  ports:
+    - name: https
+      protocol: TCP
+      port: 9200
+      targetPort: 9200
+    - name: performance-analyzer
+      protocol: TCP
+      port: 9600
+      targetPort: 9600
