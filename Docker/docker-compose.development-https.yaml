@@ -3,6 +3,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=https://+;http://+
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/dev_cert.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=foxids-dev-cert
       - https_port=8400
       - Settings:FoxIDsEndpoint=https://localhost:8400
     ports:
@@ -15,6 +17,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=https://+;http://+
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/dev_cert.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=foxids-dev-cert
       - https_port=8401
       - Settings:FoxIDsEndpoint=https://localhost:8400
       - Settings:FoxIDsBackendEndpoint=https://foxids
