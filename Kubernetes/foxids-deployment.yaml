@@ -38,6 +38,11 @@ spec:
             - name: "Settings__Options__Log"
               value: "Stdout"
             #   value: "OpenSearchAndStdoutErrors"
+            - name: "Logging__Console__FormatterName"
+              value: "json"
+            # Optionally raise the stdout minimum log level. Information suppresses traces; Warning also suppresses events and metrics.
+            # - name: "Logging__Console__LogLevel__Default"
+            #   value: "Information"
             - name: "Settings__Options__DataStorage"
               value: "MongoDb"
             #   value: "PostgreSql"  # PostgreSql database
@@ -174,7 +179,12 @@ spec:
               value: "true"
             - name: "Settings__Options__Log"
               value: "Stdout"
-           #   value: "OpenSearchAndStdoutErrors"
+            #   value: "OpenSearchAndStdoutErrors"
+            - name: "Logging__Console__FormatterName"
+              value: "json"
+            # Optionally raise the stdout minimum log level. Information suppresses traces; Warning also suppresses events and metrics.
+            # - name: "Logging__Console__LogLevel__Default"
+            #   value: "Information"
             - name: "Settings__Options__DataStorage"
               value: "MongoDb"
            #   value: "PostgreSql"  # PostgreSql database
