@@ -1,45 +1,166 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
 metadata:
-  name: foxids-ingress-http
-  annotations:
-   # Rate Limiting, docs https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#rate-limiting
-   #nginx.ingress.kubernetes.io/limit-whitelist: "x.x.x.x/x"   # Configure the internal network to be excluded from rate-limiting, you can specify a list of IPs or CIDRs to allow
-   #nginx.ingress.kubernetes.io/limit-connections: "200"       # Limit the number of connections per IP address
-   #nginx.ingress.kubernetes.io/limit-rpm: "600"               # Limit the number of requests per minute per IP address
-   #nginx.ingress.kubernetes.io/limit-rps: "200"               # Limit the number of requests per second per IP address
-   #Buffer
-   nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
-   nginx.ingress.kubernetes.io/proxy-buffer-size: "32k"
-   #Certificate
-   cert-manager.io/issuer: "letsencrypt-production" #production    
-   #cert-manager.io/issuer: "letsencrypt-staging" #staging
+  name: foxids
+  namespace: foxids
 spec:
-  ingressClassName: nginx
-  tls:
-    - hosts:
-      - id.itfoxtec.com   # change to your domain -  id.my-domain.com
-      - control.itfoxtec.com  # change to your domain -  control.my-domain.com
-      secretName: letsencrypt-production-tls #production  
-      #secretName: letsencrypt-staging-tls #staging
+  gatewayClassName: nginx
+  listeners:
+    - name: http
+      port: 80
+      protocol: HTTP
+    - name: foxids
+      hostname: id.itfoxtec.com
+      port: 443
+      protocol: HTTPS
+      tls:
+        mode: Terminate
+        certificateRefs: [{name: foxids-id-tls}]
+    - name: foxids-control
+      hostname: control.itfoxtec.com
+      port: 443
+      protocol: HTTPS
+      tls:
+        mode: Terminate
+        certificateRefs: [{name: foxids-control-tls}]
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: foxids
+  namespace: foxids
+spec:
+  secretName: foxids-id-tls
+  issuerRef: {name: letsencrypt-production, kind: Issuer}
+  dnsNames: [id.itfoxtec.com]
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: foxids-control
+  namespace: foxids
+spec:
+  secretName: foxids-control-tls
+  issuerRef: {name: letsencrypt-production, kind: Issuer}
+  dnsNames: [control.itfoxtec.com]
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: https-redirect
+  namespace: foxids
+spec:
+  parentRefs:
+    - {name: foxids, sectionName: http}
+  hostnames:
+    - id.itfoxtec.com
+    - control.itfoxtec.com
   rules:
-  - host: id.itfoxtec.com   # change to your domain -  id.my-domain.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: foxids
-            port:
-              number: 8800
-  - host: control.itfoxtec.com   # change to your domain -  control.my-domain.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: foxids-control
-            port:
-              number: 8800
+    - filters:
+        - type: RequestRedirect
+          requestRedirect: {scheme: https, statusCode: 301}
+---
+apiVersion: gateway.nginx.org/v1alpha1
+kind: SnippetsFilter
+metadata:
+  name: foxids-limits
+  namespace: foxids
+spec:
+  snippets:
+    - context: http
+      value: |
+        geo $foxids_limited {
+          default 1;
+          # Add trusted client networks here, for example: 10.1.0.0/16 0;
+        }
+        map $foxids_limited $foxids_limit_key {
+          0 "";
+          default $binary_remote_addr;
+        }
+        limit_conn_zone $foxids_limit_key zone=foxids_clients:5m;
+        limit_req_zone $foxids_limit_key zone=foxids_minute:5m rate=600r/m;
+        limit_req_zone $foxids_limit_key zone=foxids_second:5m rate=200r/s;
+    - context: http.server.location
+      value: |
+        # Remove both dry-run directives to enforce the example limits.
+        limit_conn_dry_run on;
+        limit_req_dry_run on;
+        limit_conn foxids_clients 200;
+        limit_req zone=foxids_minute burst=3000 nodelay;
+        limit_req zone=foxids_second burst=1000 nodelay;
+---
+apiVersion: gateway.nginx.org/v1alpha1
+kind: SnippetsFilter
+metadata:
+  name: foxids-control-limits
+  namespace: foxids
+spec:
+  snippets:
+    - context: http
+      value: |
+        geo $foxids_control_limited {
+          default 1;
+          # Add trusted client networks here, for example: 10.1.0.0/16 0;
+        }
+        map $foxids_control_limited $foxids_control_limit_key {
+          0 "";
+          default $binary_remote_addr;
+        }
+        limit_conn_zone $foxids_control_limit_key zone=foxids_control_clients:5m;
+        limit_req_zone $foxids_control_limit_key zone=foxids_control_minute:5m rate=600r/m;
+        limit_req_zone $foxids_control_limit_key zone=foxids_control_second:5m rate=200r/s;
+    - context: http.server.location
+      value: |
+        # Remove both dry-run directives to enforce the example limits.
+        limit_conn_dry_run on;
+        limit_req_dry_run on;
+        limit_conn foxids_control_clients 200;
+        limit_req zone=foxids_control_minute burst=3000 nodelay;
+        limit_req zone=foxids_control_second burst=1000 nodelay;
+---
+apiVersion: gateway.nginx.org/v1alpha1
+kind: ProxySettingsPolicy
+metadata:
+  name: foxids-response-buffers
+  namespace: foxids
+spec:
+  targetRefs:
+    - {group: gateway.networking.k8s.io, kind: HTTPRoute, name: foxids}
+    - {group: gateway.networking.k8s.io, kind: HTTPRoute, name: foxids-control}
+  buffering:
+    disable: true
+    bufferSize: 32k
+    buffers: {number: 4, size: 32k}
+    busyBuffersSize: 64k
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: foxids
+  namespace: foxids
+spec:
+  parentRefs:
+    - {name: foxids, sectionName: foxids}
+  hostnames: [id.itfoxtec.com]
+  rules:
+    - backendRefs:
+        - {name: foxids, port: 8800}
+      filters:
+        - type: ExtensionRef
+          extensionRef: {group: gateway.nginx.org, kind: SnippetsFilter, name: foxids-limits}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: foxids-control
+  namespace: foxids
+spec:
+  parentRefs:
+    - {name: foxids, sectionName: foxids-control}
+  hostnames: [control.itfoxtec.com]
+  rules:
+    - backendRefs:
+        - {name: foxids-control, port: 8800}
+      filters:
+        - type: ExtensionRef
+          extensionRef: {group: gateway.nginx.org, kind: SnippetsFilter, name: foxids-control-limits}

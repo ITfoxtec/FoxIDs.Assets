@@ -10,8 +10,12 @@ spec:
      name: letsencrypt-staging 
     solvers:
       - http01:
-          ingress:
-            class: nginx
+          gatewayHTTPRoute:
+            parentRefs:
+              - name: foxids
+                namespace: foxids
+                kind: Gateway
+                sectionName: http
 ---
 apiVersion: cert-manager.io/v1
 kind: Issuer
@@ -25,5 +29,9 @@ spec:
       name: letsencrypt-production 
     solvers:
       - http01:
-          ingress:
-            class: nginx
+          gatewayHTTPRoute:
+            parentRefs:
+              - name: foxids
+                namespace: foxids
+                kind: Gateway
+                sectionName: http
