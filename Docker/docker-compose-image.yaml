@@ -1,6 +1,6 @@
 services:
   foxids:
-    image: www.foxids.com/foxids:x.x.x
+    image: www.foxids.com/foxids:2.34.5
     environment:
       - Settings:Options:DataStorage=MongoDb
       - Settings:Options:Cache=Redis 
@@ -11,7 +11,7 @@ services:
       - mongodb
       - redis
   foxids-control:
-    image: www.foxids.com/foxidscontrol:x.x.x
+    image: www.foxids.com/foxidscontrol:2.34.5
     environment:
       - Settings:MasterSeedEnabled=true
       - Settings:MainTenantSeedEnabled=true
@@ -25,11 +25,11 @@ services:
       - mongodb
       - redis
   mongodb:
-    image: mongo:latest
+    image: mongo:9.0.8
     volumes:
       - foxids-data:/data/db
   redis:
-    image: redis:latest
+    image: redis:8.12.0
 volumes:
     foxids-data:
     #    external: true    # uncomment if data is saved in the host file system
